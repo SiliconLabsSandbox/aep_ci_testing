@@ -1,0 +1,18 @@
+name: Check Build
+
+on:
+  push:
+    paths:
+      - .github/workflows/test.yml
+
+jobs:
+  check-build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Check out public repo
+        uses: actions/checkout@v4
+        with:
+          repository: 'SiliconLabsSoftware/testing_cicd_aep'
+          ref: 'main'
+          path: 'projects'
