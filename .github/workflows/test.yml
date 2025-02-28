@@ -29,13 +29,14 @@ jobs:
         env:
           TIMEOUT: 1800
         run: |
-          sleep 30
+          sleep 3
           run_id=$(curl -s \
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: token ${{ secrets.PERSONAL_ACCESS_TOKEN }}" \
             https://api.github.com/repos/SiliconLabsInternal/testing_ci_aep/actions/runs \
-            | jq '.workflow_runs[] | select(.name=="Bluetooth AoA Check") | .id' | head -n 1)
+            | jq '.workflow_runs[] | select(.name=="Be triggered") | .id' | head -n 1)
           echo "Run ID: $run_id"
+          
           start_time=$(date +%s)
           while true; do
             current_time=$(date +%s)
@@ -44,16 +45,20 @@ jobs:
               echo "Error: Workflow did not complete within $((TIMEOUT / 60)) minutes."
               exit 1
             fi
+            
+            ##########################################
             status=$(curl -s \
               -H "Accept: application/vnd.github.v3+json" \
               -H "Authorization: token ${{ secrets.PERSONAL_ACCESS_TOKEN }}" \
               https://api.github.com/repos/SiliconLabsInternal/testing_ci_aep/actions/runs/$run_id \
               | jq -r '.status')
+            
             conclusion=$(curl -s \
               -H "Accept: application/vnd.github.v3+json" \
               -H "Authorization: token ${{ secrets.PERSONAL_ACCESS_TOKEN }}" \
               https://api.github.com/repos/SiliconLabsInternal/testing_ci_aep/actions/runs/$run_id \
               | jq -r '.conclusion')
+            
             echo "Status: $status, Conclusion: $conclusion"
             if [[ "$status" == "completed" ]]; then
               if [[ "$conclusion" == "success" ]]; then
@@ -64,5 +69,5 @@ jobs:
                 exit 1
               fi
             fi
-            sleep 30
+            sleep 3
           done
