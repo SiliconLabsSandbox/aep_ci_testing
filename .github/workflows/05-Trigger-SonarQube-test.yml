@@ -1,10 +1,10 @@
-name: Trigger Internal Runners
+name: Trigger and Monitor SQ Test
 
 on:
   workflow_dispatch:
 
 jobs:
-  trigger-internal:
+  trigger-SQ-test:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Workflow

@@ -1,9 +1,12 @@
-name: Check Build
-
+name: 02-Build-Firmware
 on:
-  push:
-    paths:
-      - .github/workflows/build.yml
+  pull_request:
+    branches:
+      - main
+      - develop
+  
+  workflow_dispatch:
+
 env:
   SL_SLC_PATH: ${{ github.workspace }}/tools/slc_cli/slc
   SS_URL: https://github.com/silabs-CongD/tools/releases/download/v2.0/SimplicityStudio-5_linux.tgz
