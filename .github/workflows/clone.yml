@@ -1,0 +1,30 @@
+name: Terminal Theme Example
+
+on: 
+  workflow_dispatch:
+
+  push:
+    paths:
+     - .github/workflows/clone.yml
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Generate a token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.SILABS_APPS_ID }}
+          private-key: ${{ secrets.SILABS_APPS_PRIVATE_KEY }}
+          owner: SiliconLabsSoftware
+            
+      - uses: actions/checkout@v4
+        with:
+          repository: SiliconLabsSoftware/circuitpython_applications_staging
+          token: ${{ steps.generate-token.outputs.token }}
+          ref: main
+          # Make sure the value of GITHUB_TOKEN will not be persisted in repo's config
+          persist-credentials: false
+          
