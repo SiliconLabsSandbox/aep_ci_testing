@@ -62,7 +62,8 @@ SL_WEAK void app_init(void)
   sl_status_t status;
 
   status = air_quality_app_init();
-  if (status != SL_STATUS_OK) {
+  if (status != SL_STATUS_OK) 
+  {
     app_log_warning("Failed to initialize air quality app.\r\n");
     app_log_nl();
   }
@@ -121,18 +122,14 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       system_id[7] = address.addr[0];
 
       sc = sl_bt_gatt_server_write_attribute_value(gattdb_system_id,
-                                                   0,
-                                                   sizeof(system_id),
-                                                   system_id);
+                                                   0, sizeof(system_id), system_id);
       app_assert_status(sc);
 
       app_log_info("Bluetooth %s address: %02X:%02X:%02X:%02X:%02X:%02X\r\n",
                    address_type ? "static random" : "public device",
                    address.addr[5],
-                   address.addr[4],
-                   address.addr[3],
-                   address.addr[2],
-                   address.addr[1],
+                   address.addr[4], address.addr[3],
+                   address.addr[2], address.addr[1],
                    address.addr[0]);
 
       // Maximum allowed bonding count: 8
@@ -271,8 +268,7 @@ static void connection_closed_handler(sl_bt_msg_t *evt)
   // reset bonding handle variable to avoid deleting wrong bonding info
   ble_bonding_handle = 0xff;
 
-  app_log("Bluetooth Stack Event : CONNECTION CLOSED (reason: 0x%04X)\r\n",
-          evt->data.evt_connection_closed.reason);
+  app_log("Bluetooth Stack Event : CONNECTION CLOSED (reason: 0x%04X)\r\n", evt->data.evt_connection_closed.reason);
 
   // Restart advertising after client has disconnected.
   sc = sl_bt_legacy_advertiser_start(
