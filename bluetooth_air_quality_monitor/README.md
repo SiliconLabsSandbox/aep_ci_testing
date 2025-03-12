@@ -41,6 +41,8 @@ This code example referred to the following code examples. More detailed informa
 
 ## Connections Required ##
 
+haha
+
 The hardware connection is shown in the image below:
 
 ![hardware connection](images/hardware_connection.png)
