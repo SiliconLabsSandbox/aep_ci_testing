@@ -4,6 +4,9 @@ on:
     workflows: ["03-Build-Firmware"]
     types: [completed]
 
+  pull_request:
+    types: [opened, synchronize, edited]
+    
   workflow_dispatch:
 
 env:
