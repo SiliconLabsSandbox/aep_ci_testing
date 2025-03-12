@@ -1,9 +1,9 @@
 name: 01-Check-Code-Convention
 on:
-  push:
-    branches-ignore:
-      - main
-      - "tests/**"
+  # push:
+  #   branches-ignore:
+  #     - main
+  #     - "tests/**"
   
   pull_request:
     types: [opened, synchronize, edited]
