@@ -29,6 +29,8 @@ jobs:
               
       - name: Poll the change
         run: |
+          ls projects
+
           cd projects
           git diff --name-only origin/$merge_branch HEAD | grep '/' | cut -d'/' -f1 | sort | uniq > git_log.txt
           # Skip check if the changed files are at the root path: e.g. README.md, .github, LICENSE

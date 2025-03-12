@@ -27,11 +27,16 @@ jobs:
       - name: Trigger Workflow
         id: trigger
         run: |
+          echo $GITHUB_HEAD_REF
+          echo ${{ github.ref }}
+          echo ==============
+          ls projects
+
           response=$(curl -X POST \
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: token ${{ secrets.PERSONAL_ACCESS_TOKEN }}" \
             https://api.github.com/repos/SiliconLabsSoftware/aep_ci_tools/actions/workflows/sandbox_trigger_sonar.yml/dispatches \
-            -d '{"ref":"main","inputs":{"repository": "${{ github.repository }}" ,"ref":"${{ github.ref }}"}}')
+            -d '{"ref":"main","inputs":{"repository": "${{ github.repository }}" ,"ref":"${GITHUB_HEAD_REF}"}}')
           
           echo "Triggered workflow: $response"
           if echo "$response" | grep -q '"message": "Not Found"'; then
