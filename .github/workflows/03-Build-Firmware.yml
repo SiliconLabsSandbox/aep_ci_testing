@@ -23,6 +23,11 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
+      - name: Check out this repo
+        uses: actions/checkout@v4
+        with:
+          path: 'projects'
+              
       - name: Poll the change
         run: |
           cd projects
@@ -76,11 +81,6 @@ jobs:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           path: 'pr_check'
 
-
-      - name: Check out this repo
-        uses: actions/checkout@v4
-        with:
-          path: 'projects'
       
       ###########################################################
       - name: Do check README
