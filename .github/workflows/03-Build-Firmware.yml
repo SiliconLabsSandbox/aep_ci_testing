@@ -6,8 +6,8 @@ on:
     types: 
       - completed
   
-  pull_request:
-    types: [opened, synchronize, edited]
+  # pull_request:
+  #   types: [opened, synchronize, edited]
 
 env:
   SL_SLC_PATH: ${{ github.workspace }}/tools/slc_cli/slc
