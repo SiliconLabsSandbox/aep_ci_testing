@@ -24,14 +24,10 @@ jobs:
       - name: Trigger Workflow
         id: trigger
         run: |
-          echo "Repository: $REPOSITORY_NAME"
-          echo "Branch: $BRANCH_NAME"
-          echo "Owner: $OWNER_NAME"
-          
           response=$(curl -X POST \
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: token ${{ secrets.PERSONAL_ACCESS_TOKEN }}" \
-            https://api.github.com/repos/SiliconLabsSoftware/aep_ci_tools/actions/workflows/trigger.yml/dispatches \
+            https://api.github.com/repos/SiliconLabsSoftware/aep_ci_tools/actions/workflows/sandbox_trigger_sonar.yml/dispatches \
             -d '{"ref":"main","inputs":{"repository": "${{ github.repository }}" ,"ref":"${{ github.ref }}"}}')
           
           echo "Triggered workflow: $response"
@@ -50,7 +46,7 @@ jobs:
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: token ${{ secrets.PERSONAL_ACCESS_TOKEN }}" \
             https://api.github.com/repos/SiliconLabsSoftware/aep_ci_tools/actions/runs \
-            | jq '.workflow_runs[] | select(.name=="Be triggered") | .id' | head -n 1)
+            | jq '.workflow_runs[] | select(.name=="Trigger_Sonar") | .id' | head -n 1)
           echo "Run ID: $run_id"
           
           start_time=$(date +%s)
@@ -92,7 +88,7 @@ jobs:
                 exit 0
               else
                 echo "Workflow failed."
-                if curl --output /dev/null --silent --head --fail "$url"; then
+                if curl --output /dev/null --silent --head --fail "$SONAR_REPORT_URL"; then
                   echo "View Sonarqube result check at url: $SONAR_REPORT_URL"
                 else
                   echo "SonarQube ran failed! Did not found SonarQube report!"
