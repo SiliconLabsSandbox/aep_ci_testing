@@ -61,16 +61,6 @@ jobs:
               exit 1
             fi
             
-
-
-            # Get unique 8 SHA number for each Pull request
-            cd projects
-            git fetch origin $merge_branch
-            commit_id=$(git merge-base HEAD origin/$merge_branch)
-            COMMIT_8_SHA=${commit_id::8}
-
-            SONAR_REPORT_URL=$GH_PAGE_ROOT_URL/$COMMIT_8_SHA/sonar_report.html
-
             ##########################################
             status=$(curl -s \
               -H "Accept: application/vnd.github.v3+json" \
@@ -84,6 +74,16 @@ jobs:
               https://api.github.com/repos/SiliconLabsSoftware/aep_ci_tools/actions/runs/$run_id \
               | jq -r '.conclusion')
             
+            # Get unique 8 SHA number for each Pull request
+            echo ===================
+            ls .
+            cd projects
+            git fetch origin $merge_branch
+            commit_id=$(git merge-base HEAD origin/$merge_branch)
+            COMMIT_8_SHA=${commit_id::8}
+
+            SONAR_REPORT_URL=$GH_PAGE_ROOT_URL/$COMMIT_8_SHA/sonar_report.html
+
             echo "Status: $status, Conclusion: $conclusion"
             if [[ "$status" == "completed" ]]; then
               if [[ "$conclusion" == "success" ]]; then

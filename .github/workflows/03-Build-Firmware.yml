@@ -17,6 +17,7 @@ env:
   WORKSPACE: ${{ github.workspace }}
   CI_REPO_DIR: ${{ github.workspace }}/application_examples_ci
   repo: ${{ github.repository }}
+  merge_branch: main
   
 jobs:
   Build-Firmware:
