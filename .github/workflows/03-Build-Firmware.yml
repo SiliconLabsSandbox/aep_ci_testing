@@ -32,7 +32,8 @@ jobs:
           ls projects
 
           cd projects
-          git diff --name-only $merge_branch HEAD | grep '/' | cut -d'/' -f1 | sort | uniq > git_log.txt
+          git fetch origin $merge_branch
+          git diff --name-only origin/$merge_branch HEAD | grep '/' | cut -d'/' -f1 | sort | uniq > git_log.txt
           # Skip check if the changed files are at the root path: e.g. README.md, .github, LICENSE
           grep -v "README.md\\|.github\\|LICENSE\\|templates.xml\\|tools" git_log.txt > git_diff.txt
 
