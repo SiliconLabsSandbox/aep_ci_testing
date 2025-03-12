@@ -3,7 +3,8 @@ name: 03-Build-Firmware
 on:
   workflow_run:
     workflows: ["00-TruffleHog-Security-Scan"]
-    types: [completed]
+    types: 
+      - completed
   
   pull_request:
     types: [opened, synchronize, edited]
