@@ -3,8 +3,11 @@ name: 03-Build-Firmware
 on:
   workflow_run:
     workflows: ["00-TruffleHog-Security-Scan"]
-    types:
-      - success
+    types: 
+      - completed
+  
+  # pull_request:
+  #   types: [opened, synchronize, edited]
 
 env:
   SL_SLC_PATH: ${{ github.workspace }}/tools/slc_cli/slc
@@ -18,12 +21,12 @@ env:
 jobs:
   Build-Firmware:
     runs-on: ubuntu-latest
-    if: "! contains(github.event.pull_request.body, 'SKIP_CI')"
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Poll the change
         run: |
           cd projects
-          git diff --name-only $merge_branch HEAD | grep '/' | cut -d'/' -f1 | sort | uniq > git_log.txt
+          git diff --name-only origin/$merge_branch HEAD | grep '/' | cut -d'/' -f1 | sort | uniq > git_log.txt
           # Skip check if the changed files are at the root path: e.g. README.md, .github, LICENSE
           grep -v "README.md\\|.github\\|LICENSE\\|templates.xml\\|deprecated" git_log.txt > git_diff.txt
 
