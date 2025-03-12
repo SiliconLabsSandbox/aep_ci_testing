@@ -1,0 +1,155 @@
+name: 03-Build-Firmware
+
+on:
+  workflow_run:
+    workflows: ["00-TruffleHog-Security-Scan"]
+    types:
+      - success
+
+env:
+  SL_SLC_PATH: ${{ github.workspace }}/tools/slc_cli/slc
+  SS_URL: https://github.com/silabs-CongD/tools/releases/download/v2.0/SimplicityStudio-5_linux.tgz
+  SL_STUDIO_BUILD_PATH: ${{ github.workspace }}/tools/SimplicityStudio_v5
+  ARM_GCC_DIR: ${{ github.workspace }}/tools/SimplicityStudio_v5/developer/toolchains/gnu_arm/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi
+  WORKSPACE: ${{ github.workspace }}
+  CI_REPO_DIR: ${{ github.workspace }}/application_examples_ci
+  repo: ${{ github.repository }}
+  
+jobs:
+  Build-Firmware:
+    runs-on: ubuntu-latest
+    if: "! contains(github.event.pull_request.body, 'SKIP_CI')"
+    steps:
+      - name: Poll the change
+        run: |
+          cd projects
+          git diff --name-only $merge_branch HEAD | grep '/' | cut -d'/' -f1 | sort | uniq > git_log.txt
+          # Skip check if the changed files are at the root path: e.g. README.md, .github, LICENSE
+          grep -v "README.md\\|.github\\|LICENSE\\|templates.xml\\|deprecated" git_log.txt > git_diff.txt
+
+          xargs -I{} -a git_diff.txt find {} -type f -name "*.[ch]" > source_list.txt
+          xargs -I{} -a git_diff.txt find {} -type f -name "*.slcp" > solution_list.txt
+
+          if ! [ -s source_list.txt -o -s solution_list.txt ]; then
+            printf 'Skip check. No changed project found.'
+            exit 1
+          fi
+
+          # For debug
+          cat git_diff.txt
+
+      - name: Install tools
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install python3-pip -y
+          pip3 install gitpython
+
+          sudo apt-get install git-lfs -y
+          git lfs install --skip-repo
+
+          curl -L -o slccli.zip https://www.silabs.com/documents/login/software/slc_cli_linux.zip
+          unzip slccli.zip -d tools > /dev/null && rm slccli.zip
+          chmod +x $SL_SLC_PATH
+          
+          curl -L -o ss.tgz $SS_URL
+          tar -xvf ss.tgz -C tools > /dev/null && rm ss.tgz
+          chmod +x $SL_STUDIO_BUILD_PATH/developer/toolchains/gnu_arm/10.3_2021.10
+          
+          curl -L -o 12.2.tgz https://github.com/SiliconLabs/application_examples_ci/releases/download/v1.2/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi.tar.xz
+          tar -xvf 12.2.tgz -C $SL_STUDIO_BUILD_PATH/developer/toolchains/gnu_arm > /dev/null
+          ls $SL_STUDIO_BUILD_PATH/developer/toolchains/gnu_arm
+          chmod +x $ARM_GCC_DIR
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'oracle'
+          java-version: '21'
+
+      - name: Check out scripts branch
+        uses: actions/checkout@v4
+        with:
+          repository: SiliconLabsSoftware/aep_ci_tools
+          ref: 'pull_request_process'
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          path: 'pr_check'
+
+
+      - name: Check out this repo
+        uses: actions/checkout@v4
+        with:
+          path: 'projects'
+      
+      ###########################################################
+      - name: Do check README
+        run : |
+          
+          
+          cd projects
+          bash ${{ github.workspace }}/pr_check/scripts/check_readme_file_v2.sh ${{ github.workspace }}/changed_projects.txt > ${{ github.workspace }}/readme_file_report.html
+          if grep -qe "Fail" ${{ github.workspace }}/readme_file_report.html; then
+            echo "result_readme=failure" >> $GITHUB_ENV
+          else
+            echo "result_readme=success" >> $GITHUB_ENV
+          fi 
+      
+      ###########################################################
+      # - name: Do check Coding_Style
+      #   run : |
+      #     export BUILD_URL="test_url"
+          
+      #     cd projects
+      #     bash ${{ github.workspace }}/pr_check/scripts/check_coding_style.sh ${{ github.workspace }}/changed_projects.txt $BUILD_URL > ${{ github.workspace }}/coding_style_report.html
+      #     if grep -qe "Fail" ${{ github.workspace }}/coding_style_report.html; then
+      #       echo "result_coding=failure" >> $GITHUB_ENV
+      #     else
+      #       echo "result_coding=success" >> $GITHUB_ENV
+      #     fi   
+      
+      #     # artifact url: $REPOSITORY_URL/actions/runs/$RUN_ID/artifacts/$ARTIFACT_ID
+
+      # - name: Archive results
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: check-coding_style-report
+      #     path: ${{ github.workspace }}/projects/uncrustify_formatted_files.zip
+      #     if-no-files-found: ignore
+
+      ###########################################################
+      - name: Check out json ci repo
+        uses: actions/checkout@v4
+        with:
+          repository: 'SiliconLabs/application_examples_ci'
+          path: 'application_examples_ci'
+
+      - name: Do check build
+        run: |
+          $SL_SLC_PATH configuration -gcc $ARM_GCC_DIR
+
+          mkdir changed_projects
+          while read line; do cp -r ./projects/$line --parents ./changed_projects; done < git_diff.txt
+
+          export SCRIPT_PATH=${{ github.workspace }}/pr_check/scripts/checkproject.py
+          export PROJECT_PATH=${{ github.workspace }}/changed_projects
+          python3 -u $SCRIPT_PATH --junit --html --release --slcpgcc --sls $PROJECT_PATH
+
+          if grep -qe "Fail" ${{ github.workspace }}/build_test_project.html; then
+            exit 1
+          fi
+
+      # - name: Do check build
+      #   run: |
+
+      #     $SL_SLC_PATH configuration -gcc $ARM_GCC_DIR
+      #     export SCRIPT_PATH=${{ github.workspace }}/pr_check/scripts/checkproject.py
+      #     export PROJECT_PATH=${{ github.workspace }}/projects/$PROJECT_FOLDER
+          
+      #     python3 -u $SCRIPT_PATH --junit --html --release --slcpgcc $PROJECT_PATH
+          
+      #     if grep -qe "Fail" ${{ github.workspace }}/build_test_project.html; then
+      #       echo "result_build=failure" >> $GITHUB_ENV
+      #       exit 1
+      #     else
+      #       echo "result_build=success" >> $GITHUB_ENV
+      #     fi
+
+      

@@ -1,4 +1,4 @@
-name: 04-TruffleHog-Security-Scan
+name: 00-TruffleHog-Security-Scan
 on:
   pull_request:
     branches:
