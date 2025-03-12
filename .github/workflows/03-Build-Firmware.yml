@@ -23,12 +23,17 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
+      - name: Check out this repo
+        uses: actions/checkout@v4
+        with:
+          path: 'projects'
+              
       - name: Poll the change
         run: |
           cd projects
           git diff --name-only origin/$merge_branch HEAD | grep '/' | cut -d'/' -f1 | sort | uniq > git_log.txt
           # Skip check if the changed files are at the root path: e.g. README.md, .github, LICENSE
-          grep -v "README.md\\|.github\\|LICENSE\\|templates.xml\\|deprecated" git_log.txt > git_diff.txt
+          grep -v "README.md\\|.github\\|LICENSE\\|templates.xml\\|tools" git_log.txt > git_diff.txt
 
           xargs -I{} -a git_diff.txt find {} -type f -name "*.[ch]" > source_list.txt
           xargs -I{} -a git_diff.txt find {} -type f -name "*.slcp" > solution_list.txt
@@ -76,11 +81,6 @@ jobs:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           path: 'pr_check'
 
-
-      - name: Check out this repo
-        uses: actions/checkout@v4
-        with:
-          path: 'projects'
       
       ###########################################################
       - name: Do check README

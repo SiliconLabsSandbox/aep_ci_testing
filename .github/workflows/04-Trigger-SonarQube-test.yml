@@ -1,7 +1,7 @@
 name: 04-SonarQube
 on:
   workflow_run:
-    workflows: ["03-Build-Firmware"]
+    workflows: ["00-TruffleHog-Security-Scan"]
     types: 
       - completed
 
