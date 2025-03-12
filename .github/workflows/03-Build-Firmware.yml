@@ -3,8 +3,7 @@ name: 03-Build-Firmware
 on:
   workflow_run:
     workflows: ["00-TruffleHog-Security-Scan"]
-    types:
-      - success
+    types: [completed]
 
 env:
   SL_SLC_PATH: ${{ github.workspace }}/tools/slc_cli/slc
@@ -18,7 +17,7 @@ env:
 jobs:
   Build-Firmware:
     runs-on: ubuntu-latest
-    if: "! contains(github.event.pull_request.body, 'SKIP_CI')"
+    if: ${{ github.event.workflow_run.conclusion == 'success' && "! contains(github.event.pull_request.body, 'SKIP_CI')" }}
     steps:
       - name: Poll the change
         run: |
