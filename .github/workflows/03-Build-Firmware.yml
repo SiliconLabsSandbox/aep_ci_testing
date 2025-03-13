@@ -85,41 +85,6 @@ jobs:
 
       
       ###########################################################
-      - name: Do check README
-        run : |
-          
-          
-          cd projects
-          bash ${{ github.workspace }}/pr_check/scripts/check_readme_file_v2.sh ${{ github.workspace }}/changed_projects.txt > ${{ github.workspace }}/readme_file_report.html
-          if grep -qe "Fail" ${{ github.workspace }}/readme_file_report.html; then
-            echo "result_readme=failure" >> $GITHUB_ENV
-          else
-            echo "result_readme=success" >> $GITHUB_ENV
-          fi 
-      
-      ###########################################################
-      # - name: Do check Coding_Style
-      #   run : |
-      #     export BUILD_URL="test_url"
-          
-      #     cd projects
-      #     bash ${{ github.workspace }}/pr_check/scripts/check_coding_style.sh ${{ github.workspace }}/changed_projects.txt $BUILD_URL > ${{ github.workspace }}/coding_style_report.html
-      #     if grep -qe "Fail" ${{ github.workspace }}/coding_style_report.html; then
-      #       echo "result_coding=failure" >> $GITHUB_ENV
-      #     else
-      #       echo "result_coding=success" >> $GITHUB_ENV
-      #     fi   
-      
-      #     # artifact url: $REPOSITORY_URL/actions/runs/$RUN_ID/artifacts/$ARTIFACT_ID
-
-      # - name: Archive results
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: check-coding_style-report
-      #     path: ${{ github.workspace }}/projects/uncrustify_formatted_files.zip
-      #     if-no-files-found: ignore
-
-      ###########################################################
       - name: Check out json ci repo
         uses: actions/checkout@v4
         with:
@@ -133,28 +98,13 @@ jobs:
           mkdir changed_projects
           while read line; do cp -r ./projects/$line --parents ./changed_projects; done < projects/git_diff.txt
 
-          export SCRIPT_PATH=${{ github.workspace }}/pr_check/scripts/checkproject.py
+          export SCRIPT_PATH=${{ github.workspace }}/pr_check/scripts/checkproject_sandbox.py
           export PROJECT_PATH=${{ github.workspace }}/changed_projects
           python3 -u $SCRIPT_PATH --junit --html --release --slcpgcc --sls $PROJECT_PATH
 
-          if grep -qe "Fail" ${{ github.workspace }}/build_test_project.html; then
+          # cat ${{ github.workspace }}/build_test_project.log
+          GREP_COLORS='mt=32' grep --color=always 'Pass\|$' ${{ github.workspace }}/build_test_project.log | GREP_COLORS='mt=31' grep --color=always 'Fail\|$'
+          if grep -qe "Fail" ${{ github.workspace }}/build_test_project.log; then
             exit 1
           fi
-
-      # - name: Do check build
-      #   run: |
-
-      #     $SL_SLC_PATH configuration -gcc $ARM_GCC_DIR
-      #     export SCRIPT_PATH=${{ github.workspace }}/pr_check/scripts/checkproject.py
-      #     export PROJECT_PATH=${{ github.workspace }}/projects/$PROJECT_FOLDER
-          
-      #     python3 -u $SCRIPT_PATH --junit --html --release --slcpgcc $PROJECT_PATH
-          
-      #     if grep -qe "Fail" ${{ github.workspace }}/build_test_project.html; then
-      #       echo "result_build=failure" >> $GITHUB_ENV
-      #       exit 1
-      #     else
-      #       echo "result_build=success" >> $GITHUB_ENV
-      #     fi
-
       

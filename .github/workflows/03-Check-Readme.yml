@@ -1,0 +1,35 @@
+name: Check-README
+
+on:
+  pull_request:
+    types: [opened, synchronize, edited]
+  
+jobs:
+  Check-README:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out this repo
+        uses: actions/checkout@v4
+        with:
+          path: 'projects'
+
+      - name: Check out scripts branch
+        uses: actions/checkout@v4
+        with:
+          repository: SiliconLabsSoftware/aep_ci_tools
+          ref: 'pull_request_process'
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          path: 'pr_check'
+
+      - name: Check README.md files
+        run: |
+          cd projects
+          bash ${{ github.workspace }}/pr_check/scripts/check_readme_file_sandbox.sh ${{ github.workspace }}/changed_projects.txt > readme_file_report.log
+          GREP_COLORS='mt=32' grep --color=always 'PASS\|$' readme_file_report.log | GREP_COLORS='mt=31' grep --color=always 'FAILURE\|$'
+          if grep -qe "FAILURE" readme_file_report.log; then
+            echo "README.md file did not follow standard structure. Pls correct it."
+            exit 1
+          else
+            echo "README.md file followed standard structure"
+          fi           
+          
