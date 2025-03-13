@@ -82,11 +82,11 @@ jobs:
             if [[ "$status" == "completed" ]]; then
               if [[ "$conclusion" == "success" ]]; then
                 echo "Workflow completed successfully."
-                echo "TRIGGER_SONAR=success" >> $GITHUB_ENV
                 exit 0
               else
+                echo "TRIGGER_SONAR=failure" >> $GITHUB_ENV
                 echo "Workflow failed."
-                exit 1
+                exit 0
               fi
             fi
             sleep 3
@@ -102,7 +102,7 @@ jobs:
 
           SONAR_REPORT_URL=$GH_PAGE_ROOT_URL/$COMMIT_8_SHA/sonar_report.html
 
-          if [[ "$TRIGGER_SONAR" != "success" ]]; then
+          if [[ "$TRIGGER_SONAR" == "failure" ]]; then
             echo "Workflow failed."
             if curl --output /dev/null --silent --head --fail "$SONAR_REPORT_URL"; then
               echo "View Sonarqube result check at url: $SONAR_REPORT_URL"
