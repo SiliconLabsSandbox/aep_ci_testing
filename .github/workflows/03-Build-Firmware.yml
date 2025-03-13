@@ -131,7 +131,7 @@ jobs:
           $SL_SLC_PATH configuration -gcc $ARM_GCC_DIR
 
           mkdir changed_projects
-          while read line; do cp -r ./projects/$line --parents ./changed_projects; done < git_diff.txt
+          while read line; do cp -r ./projects/$line --parents ./changed_projects; done < projects/git_diff.txt
 
           export SCRIPT_PATH=${{ github.workspace }}/pr_check/scripts/checkproject.py
           export PROJECT_PATH=${{ github.workspace }}/changed_projects
