@@ -60,7 +60,7 @@ The Thunderboard Sense 2 and the MikroE Buzzer 2 Click can be plugged into the S
 
 ## Setup ##
 
-To test this application, you can either create a project based on an example project or start with a "Bluetooth - SoC Empty" project based on your hardware. You should connect the Thunderboard Sense 2 Sensor-to-Cloud Advanced IoT Kit to the PC using a MicroUSB cable....
+To test this application, you can either create a project based on an example project or start with a "Bluetooth - SoC Empty" project based on your hardware. You should connect the Thunderboard Sense 2 Sensor-to-Cloud Advanced IoT Kit to the PC using a MicroUSB cable......
 
 ### Create a project based on an example project ###
 
