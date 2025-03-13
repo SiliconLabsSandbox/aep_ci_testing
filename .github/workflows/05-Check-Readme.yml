@@ -3,7 +3,10 @@ name: Check-README
 on:
   pull_request:
     types: [opened, synchronize, edited]
-  
+
+env:
+  merge_branch: main
+
 jobs:
   Check-README:
     runs-on: ubuntu-latest
